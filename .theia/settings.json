@@ -1,0 +1,14 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./src",
+        "-p",
+        "*_test.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "extensions.ignoreRecommendations": true,
+    "python.envFile": "\u0024{workspaceFolder}/.env",
+    "python.defaultInterpreterPath": "/opt/theia-env/bin/python"
+}
