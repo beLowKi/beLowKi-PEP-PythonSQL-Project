@@ -152,11 +152,11 @@ def load_and_clean_users(file_path):
     ))
 
     # DEBUG
-    cursor.execute('SELECT * FROM users')
-    records = cursor.fetchall()
-    print('\nUsers:')
-    for r in records:
-        print('\t', r)
+    # cursor.execute('SELECT * FROM users')
+    # records = cursor.fetchall()
+    # print('\nUsers:')
+    # for r in records:
+    #     print('\t', r)
 
 
 # This function will load the callLogs.csv file into the callLogs table, discarding any records with incomplete data
@@ -170,11 +170,11 @@ def load_and_clean_call_logs(file_path):
     ))
 
     # DEBUG
-    cursor.execute('SELECT * FROM callLogs')
-    records = cursor.fetchall()
-    print('\nCallLogs:')
-    for r in records:
-        print('\t', r)
+    # cursor.execute('SELECT * FROM callLogs')
+    # records = cursor.fetchall()
+    # print('\nCallLogs:')
+    # for r in records:
+    #     print('\t', r)
 
 
 # This function will write analytics data to testUserAnalytics.csv - average call time, and number of calls per user.
@@ -183,17 +183,18 @@ def load_and_clean_call_logs(file_path):
 def write_user_analytics(csv_file_path):
     # Collecting data
     cursor.execute("""
-        SELECT userId, AVG(endTime - startTime), COUNT(*)
+        SELECT userId, AVG(endTime - startTime) as avgDuration, COUNT(*) as numCalls
         FROM callLogs
         GROUP BY userId 
     """)
 
     data = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]
 
     # DEBUG
-    print('\nUserAnalytics:')
-    for r in data:
-        print('\t', r)
+    # print('\nUserAnalytics:')
+    # for r in data:
+    #     print('\t', r)
 
     # Writing to file
     try:
@@ -201,7 +202,7 @@ def write_user_analytics(csv_file_path):
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE)
 
             # Header row
-            writer.writerow(['userId', 'avgDuration', 'numCalls'])
+            writer.writerow(column_names)
 
             # Data rows
             writer.writerows(data)
@@ -213,9 +214,29 @@ def write_user_analytics(csv_file_path):
 # This function will write the callLogs ordered by userId, then start time.
 # Then, write the ordered callLogs to orderedCalls.csv
 def write_ordered_calls(csv_file_path):
+    # Collecting data
+    cursor.execute("""
+        SELECT * from callLogs
+        ORDER BY
+            userId      ASC,
+            startTime   ASC;
+    """)
 
-    print("TODO: write_ordered_calls")
+    records = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]
 
+    try:
+        with open(csv_file_path, 'w') as f:
+            writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE)
+
+            # Header row
+            writer.writerow(column_names)
+
+            # Data row(s)
+            writer.writerows(records)
+
+    except Exception as e:
+        print(f'Unexpected error writing CallLogs: {e}')
 
 
 # No need to touch the functions below!------------------------------------------
