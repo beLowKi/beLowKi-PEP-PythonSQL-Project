@@ -66,6 +66,7 @@ def load_and_clean_csv(
 
     # Final insert statement
     sql = f"INSERT INTO {table} ({', '.join(fields)}) VALUES\n"
+    added_record = False
     
     # Reading csv file
     try:
@@ -75,11 +76,6 @@ def load_and_clean_csv(
             for i, row in enumerate(data):
                 # Skipping rows with too few or too many fields
                 if len(row) != len(fields):
-
-                    # A header with incorrect number of fields 
-                    # fails the entire file
-                    # if i <= 0: return
-                    
                     # print(
                     #     f'{table}: Missing or extra field(s) in row #{i + 1}: ' 
                     #     f'expected {len(fields)} but received {len(row)}'
@@ -126,17 +122,19 @@ def load_and_clean_csv(
                     # print(f'Adding row separator after row #{i + 1}')
                     
                     # Adds separator between records
-                    if i > 1: 
+                    if added_record and i > 1: 
                         sql += ',\n'  
 
                     sql += values + ')'
+
+                    added_record = True
 
     except Exception as e:
         # print(f'Unexpected error reading {file_path}: {e}')
         return False
     
     # DEBUG
-    # print(f'Final sql statement:\n{sql};')
+    print(f'Final sql statement:\n{sql};')
     
     # Inserting user records
     try:
@@ -175,11 +173,11 @@ def load_and_clean_call_logs(file_path):
     ))
 
     # DEBUG
-    # cursor.execute('SELECT * FROM callLogs')
-    # records = cursor.fetchall()
-    # print('\nCallLogs:')
-    # for r in records:
-    #     print('\t', r)
+    cursor.execute('SELECT * FROM callLogs')
+    records = cursor.fetchall()
+    print('\nCallLogs:')
+    for r in records:
+        print('\t', r)
 
 
 # This function will write analytics data to testUserAnalytics.csv - average call time, and number of calls per user.
