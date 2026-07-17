@@ -1,6 +1,9 @@
 import csv
 import sqlite3
 
+from typing import Literal
+
+
 # Connect to the SQLite in-memory database
 conn = sqlite3.connect(':memory:')
 
@@ -159,7 +162,7 @@ def load_and_clean_users(file_path):
 # This function will load the callLogs.csv file into the callLogs table, discarding any records with incomplete data
 def load_and_clean_call_logs(file_path):
     load_and_clean_csv(file_path, 'callLogs', (
-        ('phoneNumber', int),
+        ('phoneNumber', str),
         ('startTime', int),
         ('endTime', int),
         ('direction', str),
@@ -178,8 +181,33 @@ def load_and_clean_call_logs(file_path):
 # You must save records consisting of each userId, avgDuration, and numCalls
 # example: 1,105.0,4 - where 1 is the userId, 105.0 is the avgDuration, and 4 is the numCalls.
 def write_user_analytics(csv_file_path):
+    # Collecting data
+    cursor.execute("""
+        SELECT userId, AVG(endTime - startTime), COUNT(*)
+        FROM callLogs
+        GROUP BY userId 
+    """)
 
-    print("TODO: write_user_analytics")
+    data = cursor.fetchall()
+
+    # DEBUG
+    print('\nUserAnalytics:')
+    for r in data:
+        print('\t', r)
+
+    # Writing to file
+    try:
+        with open(csv_file_path, 'w') as f:
+            writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE)
+
+            # Header row
+            writer.writerow(['userId', 'avgDuration', 'numCalls'])
+
+            # Data rows
+            writer.writerows(data)
+
+    except Exception as e:
+        print(f'Unexpected error writing UserAnalytics: {e}')
 
 
 # This function will write the callLogs ordered by userId, then start time.
