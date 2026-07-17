@@ -1,4 +1,4 @@
-phoneNumber,startTime,endTime,direction,userId
+userId,avgDuration,numCalls
 345-678-9012,1659604720,1659604800,inbound,1
 123-456-7890,1659604560,1659604600,inbound,1
 234-567-8901,1659604670,1659604700,outbound,2
