@@ -73,17 +73,21 @@ def load_and_clean_csv(
             data = csv.reader(f, delimiter=",", quoting=csv.QUOTE_NONE, skipinitialspace=True)
 
             for i, row in enumerate(data):
-                # Skips header row
-                if i <= 0: 
-                    continue
-                
                 # Skipping rows with too few or too many fields
                 if len(row) != len(fields):
+
+                    # A header with incorrect number of fields 
+                    # fails the entire file
+                    if i <= 0: break
+                    
                     # print(
                     #     f'{table}: Missing or extra field(s) in row #{i + 1}: ' 
                     #     f'expected {len(fields)} but received {len(row)}'
                     # )
                     continue
+                
+                # Skips header row
+                if i <= 0: continue
                     
                 values = '\t('
 
