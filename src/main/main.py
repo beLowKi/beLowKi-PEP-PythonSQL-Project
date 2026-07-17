@@ -46,16 +46,132 @@ def main():
 # TODO: Implement the following 4 functions. The functions must pass the unit tests to complete the project.
 
 
+def load_and_clean_csv(
+    file_path: str, 
+    table: Literal['users', 'callLogs', 'userAnalytics'],
+    expected_shape: tuple[tuple[str, type]]
+) -> None:
+    """Helper function which loads and cleans a csv file to the expected shape"""
+    
+    # Extracting expected fields and their types
+    fields = []
+    field_types = []
+    
+    for field, fieldType in expected_shape:
+        fields.append(field)
+        field_types.append(fieldType)
+
+    # Final insert statement
+    sql = f"INSERT INTO {table} ({', '.join(fields)}) VALUES\n"
+    
+    # Reading csv file
+    try:
+        with open(file_path, 'r') as f:
+            data = csv.reader(f, delimiter=",", quoting=csv.QUOTE_NONE)
+
+            for i, row in enumerate(data):
+                # Skips header row
+                if i <= 0: continue
+                
+                # Skipping rows with too few or too many fields
+                if len(row) != len(fields):
+                    # print(
+                    #     'Missing or extra field(s): ' 
+                    #     f'expected {len(fields)} but received {len(row)}'
+                    # )
+                    continue
+                    
+                values = '\t('
+
+                # Checks that this field is the expected type
+                for field_index, field_value in enumerate(row):
+                    # Empty fields auto-fail
+                    if len(field_value) <= 0:
+                        break
+
+                    expected_type = field_types[field_index]
+
+                    # Numeric types must check if
+                    # field_value (which is otherwise always a str )
+                    # is a number
+                    if expected_type in [int, float]:
+                        is_match = field_value.replace('.', '').isdigit()
+
+                    else:
+                        is_match = isinstance(field_value, expected_type)
+
+                    if not is_match:
+                        # print(
+                        #     f'Type mismatch at row #{i + 1} field index {field_index}: '
+                        #     f'expected {expected_type} but received {type(field_value)}'
+                        # )
+                        break
+
+                    # Adding insert values
+                    if field_index > 0:
+                        values += ', '
+
+                    values += f'"{field_value}"' if expected_type == str else field_value
+
+                # NOTE only happens when loop isn't broken
+                else:
+                    # print(f'Adding row separator after row #{i + 1}')
+                    
+                    # Adds separator between records
+                    if i > 1: 
+                        sql += ',\n'  
+
+                    sql += values + ')'
+
+    except Exception as e:
+        print(f'Unexpected error reading {file_path}: {e}')
+        return False
+    
+    # DEBUG
+    # print(f'Final sql statement:\n{sql};')
+    
+    # Inserting user records
+    try:
+        cursor.execute(f'{sql};')    
+
+    except Exception as e:
+        print(f'Error saving {table} records: {e}')
+        return False
+    
+    return True
+
+
 # This function will load the users.csv file into the users table, discarding any records with incomplete data
 def load_and_clean_users(file_path):
+    load_and_clean_csv(file_path, 'users', (
+        ('firstName', str),
+        ('lastName', str)
+    ))
 
-    print("TODO: load_users")
+    # DEBUG
+    cursor.execute('SELECT * FROM users')
+    records = cursor.fetchall()
+    print('\nUsers:')
+    for r in records:
+        print('\t', r)
 
 
 # This function will load the callLogs.csv file into the callLogs table, discarding any records with incomplete data
 def load_and_clean_call_logs(file_path):
+    load_and_clean_csv(file_path, 'callLogs', (
+        ('phoneNumber', int),
+        ('startTime', int),
+        ('endTime', int),
+        ('direction', str),
+        ('userId', int)
+    ))
 
-    print("TODO: load_call_logs")
+    # DEBUG
+    cursor.execute('SELECT * FROM callLogs')
+    records = cursor.fetchall()
+    print('\nCallLogs:')
+    for r in records:
+        print('\t', r)
 
 
 # This function will write analytics data to testUserAnalytics.csv - average call time, and number of calls per user.
