@@ -78,7 +78,7 @@ def load_and_clean_csv(
 
                     # A header with incorrect number of fields 
                     # fails the entire file
-                    if i <= 0: return
+                    # if i <= 0: return
                     
                     # print(
                     #     f'{table}: Missing or extra field(s) in row #{i + 1}: ' 
