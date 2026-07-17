@@ -134,7 +134,7 @@ def load_and_clean_csv(
         return False
     
     # DEBUG
-    print(f'Final sql statement:\n{sql};')
+    # print(f'Final sql statement:\n{sql};')
     
     # Inserting user records
     try:
@@ -173,11 +173,11 @@ def load_and_clean_call_logs(file_path):
     ))
 
     # DEBUG
-    cursor.execute('SELECT * FROM callLogs')
-    records = cursor.fetchall()
-    print('\nCallLogs:')
-    for r in records:
-        print('\t', r)
+    # cursor.execute('SELECT * FROM callLogs')
+    # records = cursor.fetchall()
+    # print('\nCallLogs:')
+    # for r in records:
+    #     print('\t', r)
 
 
 # This function will write analytics data to testUserAnalytics.csv - average call time, and number of calls per user.
